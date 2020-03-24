@@ -1,5 +1,22 @@
 import random
 import numpy as np
+
+from scipy.stats import t, f
+
+def tss(prob, f3):
+    x_vec = [i*0.0001 for i in range(int(5/0.0001))]
+    par = 0.5 + prob/0.1*0.05
+    for i in x_vec:
+        if abs(t.cdf(i, f3) - par) < 0.000005:
+            return i
+
+
+def taf(prob, d, f3):
+    x_vec = [i*0.001 for i in range(int(10/0.001))]
+    for i in x_vec:
+        if abs(f.cdf(i, 4-d, f3)-prob) < 0.0001:
+            return i
+
 x1min = -20
 x1max = 30
 x2min = 5
@@ -88,7 +105,9 @@ m = 3
 Gp = max(dcouple)/sum(dcouple)
 f1 = m-1
 f2 = N = 4
-Gt = 0.7679
+inscipy = taf(0.95, 1, f1 * 4)
+Gt = inscipy / (inscipy + f1 - 2)
+
 if Gp < Gt:
     print("Дисперсія однорідна")
 else:
@@ -109,7 +128,7 @@ t2 = abs(beta2)/sbs
 t3 = abs(beta3)/sbs
 
 f3 = f1*f2
-ttabl = 2.306
+ttabl = tss(0.95, (m-1)*4)
 print("f3 = f1*f2, з таблиці tтабл = 2.306")
 if t0 < ttabl:
     print("t0<ttabl, b0 не значимий")
@@ -136,8 +155,8 @@ sad = ((yy1 - y1av1)**2 + (yy2 - y2av2)**2 + (yy3 - y3av3)**2 + (yy4 - y4av4)**2
 Fp = sad/sb
 print("d1=", round(d1, 2), "d2=", round(d2, 2), "d3=", round(d3, 2), "d4=", round(d4, 2), "d5=", round(sb, 2))
 print("Fp=", round(Fp, 2))
-print('Ft берем із таблиці 8 рядяк 2 стовпець Ft = 4.5')
-Ft = 4.5
+print('Ft берем із SciPy')
+Ft = taf(0.95, d, (m-1)*4)
 if Fp > Ft:
     print("Fp=", round(Fp, 2), ">Ft", Ft, "Рівняння неадекватно оригіналу")
 else:
